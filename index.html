@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Git-Rolling-Release - A git project release model</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/MrLunar/Git-Rolling-Release">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/MrLunar/Git-Rolling-Release/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/MrLunar/Git-Rolling-Release/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Git-Rolling-Release</h1>
+          <p>A git project release model.</p>
+          <hr>
+        </div>
+
+        <h3>What is Git-Rolling-Release</h3>
+
+        <p>Git-Rolling-Release is a means of using a simpler development workflow (such as <a href="http://scottchacon.com/2011/08/31/github-flow.html">GitHub Flow</a>)
+        but still allowing for a formalised release cycle.</p>
+
+        <p>All code that is ready for release is on a master branch, but releases are determined by tags along this branch, and only this branch.
+          Releases are therefore never dictated by branch merges, resulting in zero chance of merge conflicts or dead working branches.
+          Git-Rolling-Release also allows for multiple releases that have varying release cycles. </p>
+
+        <h3>Why not just use Git Flow?</h3>
+
+        <p>For the same reasons laid out by <a href="http://scottchacon.com/2011/08/31/github-flow.html">Scott Chacon</a>, we agreed that
+        the whole work flow required too much overhead for our requirements. We wanted a flexible and fast workflow, but with staggered releases
+        due to the business critical nature of some of our projects.</p>
+
+        <p>The less time spent merging and managing code across feature, develop, release and master branches, the more time we can spend
+        developing.</p>
+
+        <h3>Why not just use GitHub Flow?</h3>
+
+        <p>GitHub Flow, by design, requires that all code on the master branch is <i>deployable</i> and <i>is deployed</i> asap. If a structured release cycle is required,
+        you can simply git tag a release, but hotfixes quickly become a major problem. Since all work is done on the master branch, to implement
+        a hotfix would require bringing the current release tag down the master branch, bringing in all features and bugfixes made since the
+        original tagged release. This undermines the stability required for release cycles in the first place.</p>
+
+        <h3>So, why use Git-Rolling-Release?</h3>
+
+        <p>If we take the best of both worlds of Git Flow and GitHub Flow, then we can achieve exactly what we want: a simple development
+          workflow for all our coders but stable, staggered releases.</p>
+
+        <p>The Git-Rolling-Release method allows for multiple, concurrent releases based on just one branch.</p>
+
+        <p>Git-Rolling-Release is not a workflow, it is a release model, since the workflow concerns how the code ends up on the master branch.</p>
+
+        <h3>How does Git-Rolling-Release handle releases?</h3>
+
+        <p>Every time a release is to be created, 2 things happen:</p>
+        <ul>
+          <li>An annotated git tag is created. Eg. <code>live-2013.05.06</code></li>
+          <li>A lightweight git tag is updated. Eg. <code>live-current</code></li>
+        </ul>
+
+        <p>The lightweight 'current' tag is a constantly updated marker of the current release. This means that the deployment system
+        always uses this tag as the deployable code and is constantly synced to servers.</p>
+
+        <p>The annotated tag is simply a milestone tag to indicate when the release was created and should never be updated. These
+        can be used by developers to debug a specific release or for <a href="#rollback">rolling back</a> a release.</p>
+
+        <p><img src="images/releases.png"></p>
+
+        <h3>Applying a Hotfix</h3>
+
+        <p>For the purposes of the Git-Rolling-Release model, the definition of a hotfix is a patch to a business critical bug present in a current release.
+        They should only be used in urgent situations.</p>
+
+        <p>With Git-Rolling-Release, a hotfix is applied by cherry-picking a commit from the master branch, and <i>only</i> from the master branch.
+        Therefore, the hotfix has already been made to the core application and simply needs to be applied to the release tag.</p>
+
+        <p>Technically, Git-Rolling-Release creates a branch at the point of the 'current' release, cherry-picks the commit and updates the release
+        to this point. The current release is no longer down the master branch, but since the hotfix was applied from the master branch,
+        the next release will not present any regression issues (since it will then be back on the master branch).</p>
+
+        <p>Assuming that hotfixes are small commits (otherwise, how did the feature pass testing or build in the first place?),
+          no conflicts should occur.</p>
+
+        <h3>Rolling back a release</h3>
+
+        <p>In the absolute worst case scenario that a simple hotfix is not sufficient (really, was this tested at all?), the release
+        can simply be rolled back to the previous milestone tag.</p>
+
+        <p>Git-Rolling-Release will update the 'current' tag to the required previous release tag. Since the deployed code is based on this tag,
+        the rolled back code will be synced out.</p>
+
+        <h3>But, but, the 'git tag --help' page says not to be this</h3>
+
+        <p>Yes, the git manual does have an entire discussion (well, not so much a discussion but just telling you not to) on re-tagging.
+        But the only moving tags are the 'current' release markers. Indeed, these should never be used by developers on the project. Instead,
+        they should only use the milestone tags if and when required.</p>
+
+        <h3>Multiple Release Cycles</h3>
+
+        <p>The real beauty of Git-Rolling-Release comes when you have multiple releases to maintain. A developers nightmare scenario is when
+        the same project has to be maintained across multiple branches or codebases that can quickly become disjointed and merges
+        slowly become a pain to handle.</p>
+
+        <p>Since all releases are based on a 'current' tag, this allows Git-Rolling-Release to handle multiple releases.</p>
+
+        <h3>Example Implementation</h3>
+
+        <p>Over a two week period, 2 releases are generated.</p>
+
+        <ul>
+          <li>Live: Automatically tagged from the staging-current tag at the start of the cycle.</li>
+          <li>Staging: Automatically tagged from the master branch every day for the first week.</li>
+        </ul>
+
+        <p>In this form, the staging release is similar to a release candidate, and is deployed to all development servers.
+        The last staging release is unchanged for a week (although can be hotfixed), after which the live release is re-generated.</p>
+
+        <p>You can then even extend this further so that another release can be on an even slower cycle, e.g. client releases.</p>
+
+        <br />
+        <hr>
+        <span class="credits left">Project maintained by <a href="https://github.com/MrLunar">MrLunar</a> (Mark Bowker)</span>
+        <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
